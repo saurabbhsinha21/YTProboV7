@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>YT View Tracker</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h1>YT View Tracker</h1>
-    <input id="videoId" placeholder="Video ID" />
+
+    <input id="videoId" type="text" placeholder="YouTube Video ID" />
     <input id="targetViews" type="number" placeholder="Target Views" />
     <input id="targetTime" type="datetime-local" />
+
     <button onclick="startTracking()">Track</button>
 
-    <div class="stats">
+    <div class="output">
       <p>Live: <span id="liveViews">-</span></p>
-      <p>Views Left: <span id="viewsLeft" class="neutral">-</span></p>
+      <p>Views Left: <span id="viewsLeft">-</span></p>
       <p>Time Left: <span id="timeLeft">-</span></p>
     </div>
   </div>
 
+  <audio id="doneSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
   <script src="script.js"></script>
 </body>
 </html>

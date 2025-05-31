@@ -1,55 +1,57 @@
 html, body {
-  height: 100%;
-  width: 100%;
   margin: 0;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-  background-color: #f7f7f7;
+  padding: 0;
+  font-family: sans-serif;
+  background: #fff;
 }
 
 .container {
   max-width: 400px;
-  margin: auto;
-  background: white;
+  margin: 40px auto;
   padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  background: #fff;
   text-align: center;
 }
 
 h1 {
-  font-size: 22px;
+  font-size: 20px;
   margin-bottom: 20px;
 }
 
 input, button {
   width: 100%;
   padding: 10px;
-  margin: 10px 0;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
+  margin: 8px 0;
   border-radius: 6px;
-  font-size: 16px;
+  border: 1px solid #ccc;
+  font-size: 14px;
 }
 
 button {
-  background-color: #007bff;
+  background: #007bff;
   color: white;
-  border: none;
+  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  border: none;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background: #0056b3;
 }
 
-.stats {
-  margin-top: 20px;
-  font-size: 18px;
+.output p {
+  margin: 10px 0;
+  font-size: 16px;
 }
 
-.stats div {
-  margin: 8px 0;
+#viewsLeft.green {
+  color: green;
+  font-weight: bold;
+}
+
+#viewsLeft.red {
+  color: red;
   font-weight: bold;
 }

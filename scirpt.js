@@ -1,9 +1,4 @@
-let tracking = false;
 let interval;
-let videoId = "";
-let targetViews = 0;
-let endTime;
-
 let apiKeys = [
   "AIzaSyBvVpO0WJB97BNO91RtqTIolLNmV66Qqt8",
   "AIzaSyBT5aGU-3R-jpP4HrGbvX4HBg0IB7IyvIQ",
@@ -13,66 +8,73 @@ let apiKeys = [
 let currentKeyIndex = 0;
 let apiKey = apiKeys[currentKeyIndex];
 
+let targetViews = 0;
+let endTime;
+let alerted = false;
+
 function startTracking() {
   clearInterval(interval);
-  tracking = true;
-  videoId = document.getElementById("videoId").value.trim();
-  targetViews = parseInt(document.getElementById("targetViews").value);
-  const targetTimeString = document.getElementById("targetTime").value;
+  alerted = false;
 
-  if (!videoId || !targetViews || !targetTimeString) {
+  const videoId = document.getElementById("videoId").value.trim();
+  targetViews = parseInt(document.getElementById("targetViews").value);
+  const targetTime = document.getElementById("targetTime").value;
+
+  if (!videoId || !targetViews || !targetTime) {
     alert("Please fill all fields.");
     return;
   }
 
-  endTime = new Date(targetTimeString);
-
-  updateStats();
-  interval = setInterval(updateStats, 700);
+  endTime = new Date(targetTime);
+  interval = setInterval(() => updateStats(videoId), 1000);
+  updateStats(videoId);
 }
 
-function fetchWithKeyRotation(url, attempt = 0) {
+function fetchWithRotation(url, attempt = 0) {
   return fetch(url)
-    .then(response => {
-      if (!response.ok) throw new Error("API quota may be exceeded.");
-      return response.json();
+    .then(res => {
+      if (!res.ok) throw new Error("Quota exceeded or invalid response");
+      return res.json();
     })
-    .catch(error => {
+    .catch(() => {
       if (attempt < apiKeys.length - 1) {
         currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
         apiKey = apiKeys[currentKeyIndex];
-        console.warn(`Switching to API Key ${currentKeyIndex + 1}`);
         const newUrl = url.replace(/key=[^&]+/, `key=${apiKey}`);
-        return fetchWithKeyRotation(newUrl, attempt + 1);
+        return fetchWithRotation(newUrl, attempt + 1);
       } else {
-        console.error("All API keys exhausted.");
-        throw error;
+        throw new Error("All API keys failed");
       }
     });
 }
 
-function updateStats() {
+function updateStats(videoId) {
   const url = `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoId}&key=${apiKey}`;
-  fetchWithKeyRotation(url).then(data => {
-    if (!data.items || data.items.length === 0) {
-      console.error("Video not found");
-      return;
-    }
-    const viewCount = parseInt(data.items[0].statistics.viewCount);
-    const currentTime = new Date();
+  fetchWithRotation(url)
+    .then(data => {
+      const viewCount = parseInt(data.items[0].statistics.viewCount);
+      document.getElementById("liveViews").innerText = viewCount.toLocaleString();
 
-    const timeLeftMinutes = Math.max(0, Math.floor((endTime - currentTime) / 60000));
-    const viewsLeft = Math.max(0, targetViews - viewCount);
+      const viewsLeft = Math.max(0, targetViews - viewCount);
+      const viewsLeftEl = document.getElementById("viewsLeft");
+      viewsLeftEl.innerText = viewsLeft.toLocaleString();
 
-    document.getElementById("liveViews").innerText = viewCount.toLocaleString();
-    document.getElementById("viewsLeft").innerText = viewsLeft.toLocaleString();
+      // Color logic
+      viewsLeftEl.className = viewsLeft === 0 ? "green" : "red";
 
-    const timeLeftString = timeLeftMinutes > 0 
-      ? `${timeLeftMinutes}m ${(60 - currentTime.getSeconds()).toString().padStart(2, "0")}s` 
-      : "0m 00s";
-    document.getElementById("timeLeft").innerText = timeLeftString;
+      // Time left
+      const now = new Date();
+      const diffMin = Math.max(0, Math.floor((endTime - now) / 60000));
+      const diffSec = Math.max(0, Math.floor((endTime - now) / 1000) % 60);
+      document.getElementById("timeLeft").innerText = `${diffMin}:${diffSec.toString().padStart(2, "0")}`;
 
-  }).catch(error => {
-    console.error("Error fetching YouTube data:", error);
-  });
+      // Sound when views left = 0
+      if (viewsLeft === 0 && !alerted) {
+        document.getElementById("doneSound").play();
+        alerted = true;
+      }
+    })
+    .catch(err => {
+      console.error("Fetch failed:", err.message);
+    });
 }
